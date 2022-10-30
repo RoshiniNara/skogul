@@ -15,6 +15,8 @@ require (
 
 require github.com/mattn/go-sqlite3 v1.14.15
 
+require github.com/rabbitmq/amqp091-go v1.5.0 // indirect
+
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
