@@ -1,0 +1,38 @@
+ 
+
+{
+
+    "receivers": {
+
+            "from-rabbitmq": {
+
+                    "type": "rabbitmq",
+
+                    "Username": "guest",
+
+                    "Password": "guest",
+
+                    "Address": "localhost:5672",
+
+                    "name": "tpoll-results",
+
+                    "handler": "some-handler"
+
+            }
+
+    },
+
+    "handlers": {
+
+            "some-handler": {
+
+                    "parser": "json",
+
+                    "sender": "print"
+
+            }
+
+    }
+
+}
+

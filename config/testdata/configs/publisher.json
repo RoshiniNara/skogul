@@ -1,0 +1,49 @@
+{
+
+    "receivers": {
+
+            "dummy-data": {
+
+                    "type": "test",
+
+                    "delay": "10s",
+
+                    "handler": "to-rmq"
+
+            }
+
+    },
+
+    "handlers": {
+
+            "to-rmq": {
+
+                    "parser": "json",
+
+                    "sender": "rabbitmqs"
+
+            }
+
+    },
+
+    "senders": {
+
+            "rabbbitmqs": {
+
+                    "type": "rabbitmq",
+
+                    "encoder": "json",
+
+                    "Username": "guest",
+
+                    "Password": "guest",
+
+                    "Address": "localhost:5672",
+
+                    "Queuename": "tpoll-results"
+
+            }
+
+    }
+
+}
