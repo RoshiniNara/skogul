@@ -11,12 +11,11 @@ type Rabbitmq struct {
 	Address     string
 	Username    string
 	Password    string
-	Encoder     skogul.EncoderRef
 	dial_string string
 	TLS         bool
 	conn        *amqp.Connection
 	Queuename   string
-	Handler     skogul.HandlerRef
+	Handler     *skogul.HandlerRef
 }
 
 /* Start the rabbitmq and never return */
@@ -33,14 +32,10 @@ func (r *Rabbitmq) Start() {
 		rabbitmqLog.Warnf("Dial error %s", err)
 	}
 
-	defer r.conn.Close()
-
 	ch, err := r.conn.Channel()
 	if err != nil {
 		rabbitmqLog.Warnf("channel creation error %s", err)
 	}
-
-	defer ch.Close()
 
 	/* Queue declaration is needed on the receiver as well since it is possible that receiver gets started before the sender */
 	q, err := ch.QueueDeclare(
@@ -55,7 +50,7 @@ func (r *Rabbitmq) Start() {
 	if err != nil {
 		rabbitmqLog.Warnf("Queue declaration error %s", err)
 	} else {
-		rabbitmqLog.Info("Queue already exists or created successfully %s", q)
+		rabbitmqLog.Info("Queue already exists or created successfully")
 	}
 
 	msgs, err := ch.Consume(
@@ -75,11 +70,15 @@ func (r *Rabbitmq) Start() {
 	var forever chan struct{}
 
 	go func() {
+		var err error
 		for d := range msgs {
-			if err := r.Handler.H.Handle(d.Body); err != nil {
+			err = r.Handler.H.Handle(d.Body)
+			if err != nil {
 				rabbitmqLog.WithError(err).Warn("Unable to handle RabbitMQ message")
 			}
 		}
 	}()
 	<-forever
+	defer r.conn.Close()
+	defer ch.Close()
 }

@@ -39,8 +39,6 @@ func (r *Rabbitmq) init() {
 		rabbitmqLog.Warnf("Dial error %s", err)
 	}
 
-	defer r.conn.Close()
-
 }
 
 func (r *Rabbitmq) Send(c *skogul.Container) error {
@@ -87,9 +85,11 @@ func (r *Rabbitmq) Send(c *skogul.Container) error {
 			ContentType: "application/json",
 			Body:        b,
 		})
+	defer r.conn.Close()
 	if err != nil {
 		return err
 	} else {
 		return nil
 	}
+
 }
