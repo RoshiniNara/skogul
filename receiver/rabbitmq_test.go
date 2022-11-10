@@ -55,6 +55,8 @@ func TestRabbitMq(t *testing.T) {
 		Queuename: "tpoll-results",
 	}
 	// send a data container to Rabbitmq
+
+	//senderq.Encoder.E.Encode(data_container)
 	senderq.Send(data_container)
 	// prepare the receiver
 	receiverq := receiver.Rabbitmq{

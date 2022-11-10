@@ -1,11 +1,13 @@
 package receiver
 
 import (
+	"encoding/json"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/telenornms/skogul"
 )
 
-var rabbitmqLog = skogul.Logger("sender", "rabbitmq")
+var rabbitmqLog = skogul.Logger("receiver", "rabbitmq")
 
 type Rabbitmq struct {
 	Address     string
@@ -72,7 +74,8 @@ func (r *Rabbitmq) Start() {
 	go func() {
 		var err error
 		for d := range msgs {
-			err = r.Handler.H.Handle(d.Body)
+			container := skogul.Container{}
+			err = json.Unmarshal(d.Body, &container)
 			if err != nil {
 				rabbitmqLog.WithError(err).Warn("Unable to handle RabbitMQ message")
 			}
