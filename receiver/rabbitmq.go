@@ -1,10 +1,9 @@
 package receiver
 
 import (
-	"encoding/json"
-
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/telenornms/skogul"
+	"github.com/telenornms/skogul/parser"
 )
 
 var rabbitmqLog = skogul.Logger("receiver", "rabbitmq")
@@ -17,7 +16,6 @@ type Rabbitmq struct {
 	TLS         bool
 	conn        *amqp.Connection
 	Queuename   string
-	Handler     *skogul.HandlerRef
 }
 
 /* Start the rabbitmq and never return */
@@ -39,15 +37,15 @@ func (r *Rabbitmq) Start() {
 		rabbitmqLog.Warnf("channel creation error %s", err)
 	}
 
-	/* Queue declaration is needed on the receiver as well since it is possible that receiver gets started before the sender */
-	q, err := ch.QueueDeclare(
+	/* Queue declaration is needed on the receiver as well since it is possible that receiver gets started before the sender or the sender i*/
+	/*q, err := ch.QueueDeclare(
 		r.Queuename,
 		false,
 		false,
 		false,
 		false,
 		nil,
-	)
+	)*/
 
 	if err != nil {
 		rabbitmqLog.Warnf("Queue declaration error %s", err)
@@ -56,7 +54,7 @@ func (r *Rabbitmq) Start() {
 	}
 
 	msgs, err := ch.Consume(
-		q.Name,
+		r.Queuename,
 		"",
 		true,
 		false,
@@ -72,12 +70,20 @@ func (r *Rabbitmq) Start() {
 	var forever chan struct{}
 
 	go func() {
-		var err error
+		//var err error
 		for d := range msgs {
-			container := skogul.Container{}
-			err = json.Unmarshal(d.Body, &container)
+			//container := skogul.Container{}
+			//err = json.Unmarshal(d.Body, &container)
+			h := skogul.Handler{}
+			h.SetParser(parser.JSON{})
+			// Parse the data using the custom JSON handler
+			c, err := h.Parse(d.Body)
 			if err != nil {
 				rabbitmqLog.WithError(err).Warn("Unable to handle RabbitMQ message")
+			}
+
+			if len(c.Metrics) != 0 {
+				rabbitmqLog.Info("Container received with metrics")
 			}
 		}
 	}()
