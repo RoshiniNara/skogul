@@ -64,7 +64,7 @@ func (r *Rabbitmq) Send(c *skogul.Container) error {
 	if err != nil {
 		rabbitmqLog.Warnf("Queue declaration error %s", err)
 	} else {
-		rabbitmqLog.Info("Queue created successfully %s", q)
+		rabbitmqLog.Info("Queue created successfully")
 	}
 
 	if r.Encoder.Name == "" {
